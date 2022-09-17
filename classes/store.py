@@ -5,16 +5,22 @@ from exceptions import ItemNotFound, QtyNotEnough, NotEnoughSpace
 
 class Store(Storage):
 
-    def __init__(self, items, capacity=100):
-        super().__init__(items, capacity)
+    def __init__(self, items, capacity=100, name='склад'):
+        super().__init__(items, capacity, name)
 
     def __str__(self):
-        s = '\n'.join([line for line in self.get_items()])
-        return f"Склад вместимостью {self.capacity} содержит:\n{s}\nСвободно: {self.get_free_space()} мест."
+        goods_list = [line for line in self.get_items()]
+
+        if not goods_list:
+            return f"Склад вместимостью \033[97m{self.capacity}\033[39m пуст."
+
+        s = '\n'.join(goods_list)
+        return f"Склад вместимостью \033[97m{self.capacity}\033[39m содержит:\n\033[36m{s}\033[39m\nСвободно: " \
+               f"\033[93m{self.get_free_space()}\033[39m мест."
 
     @property
     def name(self):
-        return 'склад'
+        return self._name
 
     def add(self, name, qty):
         if self.get_free_space() < qty:
@@ -63,5 +69,7 @@ if __name__ == '__main__':
         print(e.message)
     except ItemNotFound as e:
         print(e.message)
+
+    print(repr(a))
 
 

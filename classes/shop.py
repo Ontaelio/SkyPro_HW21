@@ -13,9 +13,15 @@ class Shop(Storage):
         super().__init__(items, capacity)
 
     def __str__(self):
-        s = '\n'.join([line for line in self.get_items()])
-        return (f"В магазине вместимостью {self.capacity} находятся:\n{s}\nСвободно: {self.get_free_space()} мест "
-                f"на полках, {self._items_space()} товарных позиций.")
+        goods_list = [line for line in self.get_items()]
+
+        if not goods_list:
+            return f"Магазин вместимостью \033[97m{self.capacity}\033[39m пуст."
+
+        s = '\n'.join(goods_list)
+        return (f"В магазине вместимостью \033[97m{self.capacity}\033[39m находятся:\n\033[36m{s}\033[39m\n"
+                f"Свободно: \033[93m{self.get_free_space()}\033[39m мест "
+                f"на полках, \033[93m{self._items_space()}\033[39m товарных позиций.")
 
     @property
     def name(self):

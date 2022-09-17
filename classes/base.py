@@ -1,18 +1,21 @@
+import json
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from exceptions import ItemNotFound, QtyNotEnough, NotEnoughSpace
 
 
 class Storage(ABC):
 
-    def __init__(self, items: dict, capacity: int):
+    def __init__(self, items: dict, capacity: int, name: Optional[str] = None):
         self._items = items
         self._capacity = capacity
         if self._space_used() > capacity:
             raise NotEnoughSpace
+        self._name = name
 
     def __repr__(self):
-        return [self.capacity, self.items]
+        return json.dumps([self.capacity, self.items], ensure_ascii=False)
 
     @abstractmethod
     def __str__(self):
@@ -30,6 +33,10 @@ class Storage(ABC):
     @property
     def capacity(self):
         return self._capacity
+
+    @classmethod
+    def all_places(cls):
+        return Storage._all_names
 
     @abstractmethod
     def add(self, name, qty):

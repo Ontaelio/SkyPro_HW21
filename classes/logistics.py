@@ -1,4 +1,5 @@
-from __future__ import annotations
+import json
+from typing import Optional
 
 from classes.base import Storage
 from classes.shop import Shop
@@ -7,14 +8,14 @@ from classes.store import Warehouse
 
 class LogisticsAction:
 
-    def __init__(self, source: Storage|None, destination: Storage|None, item, qty):
+    def __init__(self, source: Optional[Storage], destination: Optional[Storage], item, qty):
         self._source = source
         self._destination = destination
         self.item = item
         self.qty = qty
 
     def __repr__(self):
-        return [self.source, self.destination, self.item, self.qty]
+        return json.dumps([self.source, self.destination, self.item, self.qty], ensure_ascii=False)
 
     def __str__(self):
         return f"Переместить {self.qty} {self.item} из {self.source.name} в {self.destination.name}."
@@ -64,14 +65,23 @@ class LogisticsAction:
         return True
 
     def _rollback(self):
+        """
+        Return stuff back to source.
+        As this class is intended to handle _only_ logistics movement, it is not supposed to check
+        space beforehand. Thus, a rollback mimics the action of physically returning stuff back.
+        Also, this covers situations with returns from clients.
+        :return: True if everything went fine, False otherwise
+        """
         if self._source:
             try:
                 self.source.add(self.item, self.qty)
             except Exception as e:
-                print('Случилась темпоральная дисфункция и все, вообще все поломалось!!!111')
+                # this is a placeholder for possible logistics collisions in real life
+                print('Случилась темпоральная дисфункция и все, вообще все поломалось!')
                 return False
         self._move(self.destination, self.source)
         print(f"{self.qty} {self.item} возвращено в {self.source.name}.")
+        return True
 
     def execute(self):
         if self._start():
@@ -84,7 +94,7 @@ class LogisticsAction:
 # here be tests
 
 if __name__ == '__main__':
-    w = Warehouse({'печеньки': 32})
+    w = Warehouse({'печеньки': 32, 'кубышки': 2, 'лопаты': 3, 'арбузы': 1, 'ёжики': 5, 'белки': 1})
     s = Shop({})
     print(w)
     print(s)
@@ -104,3 +114,13 @@ if __name__ == '__main__':
     print(s)
     e = LogisticsAction(w, s, 'сегрегаторы', 20)
     e.execute()
+    a1 = LogisticsAction(w, s, 'кубышки', 1)
+    a2 = LogisticsAction(w, s, 'лопаты', 1)
+    a3 = LogisticsAction(w, s, 'арбузы', 1)
+    a4 = LogisticsAction(w, s, 'ёжики', 1)
+    a5 = LogisticsAction(w, s, 'белки', 1)
+    a1.execute()
+    a2.execute()
+    a3.execute()
+    a4.execute()
+    a5.execute()
