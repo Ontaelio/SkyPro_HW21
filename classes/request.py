@@ -1,23 +1,24 @@
 import json
-from typing import List
 
 from classes.base import Storage
 from classes.logistics import LogisticsAction
 
 
 class Request:
+    """
+    This class was required by the task, but here it actually handles parsing of the request string,
+    and then creates a LogisticsAction object to carry out the task.
+    """
 
     _possible_actions = ['доставить', 'утилизировать', 'создать']
 
-    def __init__(self, places: List[Storage], order: str):
-        self.places_names = [place.name for place in places]
-        self.places = places
+    def __init__(self, order: str):
         parsed = order.split(' ')
         if len(parsed) > 4:
             self._parse_request(parsed)
 
         else:
-            print('Неверный запрос (недостаточно слов).')
+            print('Неверный запрос.')
             self.action, self.amount, self.product, self.source, self.destination = None, None, None, None, None
 
     def __repr__(self):
@@ -42,13 +43,17 @@ class Request:
             print('Количество задано неверно (буквы вместо цифр?).')
             self.action = None
             return
+        if self.amount == 0:
+            print('Ничего не происходит, потому что количество нулевое.')
+            self.action = None
+            return
 
         # товар
         self.product = parsed[2]
 
         # первый адрес
         self._source_name = parsed[4]
-        if self._source_name not in self.places_names:
+        if self._source_name not in Storage.all_places():
             if self.action == 'создать':
                 print('Не понимаю, где создавать')
             else:
@@ -62,7 +67,7 @@ class Request:
         if self.action == 'доставить':
             try:
                 self._destination_name = parsed[6]
-                if self._destination_name not in self.places_names:
+                if self._destination_name not in Storage.all_places():
                     print('Не понимаю, куда доставлять.')
                     self.action = None
                     return
@@ -76,9 +81,7 @@ class Request:
             self.destination = None
 
     def _get_place_by_name(self, name):
-        for place in self.places:
-            if place.name == name:
-                return place
+        return Storage.all_places()[name]
 
     def create_action(self):
 

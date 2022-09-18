@@ -1,12 +1,18 @@
 import json
 from typing import Optional
 
+import classes.adventures as adventures
 from classes.base import Storage
 from classes.shop import Shop
 from classes.store import Warehouse
 
 
 class LogisticsAction:
+    """
+    A class to handle actual movement of stuff between two places.
+    It accepts source, destination and the actual goods (item, qty) as arguments.
+    The request itself should be composed (parsed in case of the string) somewhere else
+    """
 
     def __init__(self, source: Optional[Storage], destination: Optional[Storage], item, qty):
         self._source = source
@@ -23,6 +29,7 @@ class LogisticsAction:
     class _Placeholder:
         def __init__(self, name):
             self.name = name
+            self.danger = 0
 
     @property
     def source(self):
@@ -36,6 +43,10 @@ class LogisticsAction:
             return self._destination
         return self._Placeholder('утиль')
 
+    @destination.setter
+    def destination(self, dest):
+        self._destination = dest
+
     def _start(self):
         if self._source:
             try:
@@ -48,7 +59,11 @@ class LogisticsAction:
         return True
 
     def _move(self, source, destination):
-        print(f"Курьер везет {self.qty} {self.item} из {source.name} в {destination.name}.")
+        adventure = adventures.Adventure.happens(self)
+        if adventure:
+            self = adventure
+        else:
+            print(f"Курьер везет {self.qty} {self.item} из {source.name} в {destination.name}.")
         return True
 
     def _finish(self):

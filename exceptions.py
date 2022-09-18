@@ -12,3 +12,7 @@ class NotEnoughSpace(Exception):
 
 class ItemsLimitExceeded(Exception):
     message = 'Превышен лимит товарных позиций.'
+
+
+class StorageNameAlreadyExists(Exception):
+    message = 'Место с таким названием уже существует'

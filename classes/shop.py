@@ -4,31 +4,39 @@ from exceptions import ItemNotFound, QtyNotEnough, NotEnoughSpace, ItemsLimitExc
 
 
 class Shop(Storage):
+    """
+    A class for Shop objects
+    """
 
     _max_unique_items = 5
 
-    def __init__(self, items, capacity=20):
-        if len(items) > self._max_unique_items:
+    def __init__(self, items, capacity=20, positions=_max_unique_items, name='магазин', danger=0):
+        self.positions = positions
+        if len(items) > self.positions:
             raise ItemsLimitExceeded
-        super().__init__(items, capacity)
+        super().__init__(items, capacity, name, danger)
 
     def __str__(self):
         goods_list = [line for line in self.get_items()]
 
         if not goods_list:
-            return f"Магазин вместимостью \033[97m{self.capacity}\033[39m пуст."
+            return f"Магазин \033[92m{self.name}\033[39m вместимостью \033[97m{self.capacity}\033[39m пуст."
 
         s = '\n'.join(goods_list)
-        return (f"В магазине вместимостью \033[97m{self.capacity}\033[39m находятся:\n\033[36m{s}\033[39m\n"
+        return (f"В магазине \033[92m{self.name}\033[39m вместимостью \033[97m{self.capacity}\033[39m находятся:\n\033[36m{s}\033[39m\n"
                 f"Свободно: \033[93m{self.get_free_space()}\033[39m мест "
                 f"на полках, \033[93m{self._items_space()}\033[39m товарных позиций.")
 
     @property
     def name(self):
-        return 'магазин'
+        return self._name
+
+    @property
+    def free_positions(self):
+        return self._items_space()
 
     def _items_space(self):
-        return self._max_unique_items - len(self.items)
+        return self.positions - len(self.items)
 
     def add(self, name, qty):
         if self.get_free_space() < qty:
@@ -36,7 +44,7 @@ class Shop(Storage):
         if name in self.items:
             self.items[name] += qty
         else:
-            if len(self.items) < self._max_unique_items:
+            if len(self.items) < self.positions:
                 self.items[name] = qty
             else:
                 raise ItemsLimitExceeded
