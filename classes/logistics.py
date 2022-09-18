@@ -59,11 +59,9 @@ class LogisticsAction:
         return True
 
     def _move(self, source, destination):
-        adventure = adventures.Adventure.happens(self)
-        if adventure:
-            self = adventure
-        else:
-            print(f"Курьер везет {self.qty} {self.item} из {source.name} в {destination.name}.")
+        if adventures.Adventure.happens(self):
+            return True
+        print(f"Курьер везет {self.qty} {self.item} из {source.name} в {destination.name}.")
         return True
 
     def _finish(self):
